@@ -10,17 +10,24 @@
 else if (_deck is null)
 {
   <MudAlert Severity="Severity.Warning">Deck not found.</MudAlert>
-  <MudButton Href="" Class="mt-3">Back to decks</MudButton>
+  <MudButton Href="./" Class="mt-3">Back to decks</MudButton>
 }
 else if (_queue.Count == 0)
 {
-  <MudText Typo="Typo.h5" Class="mb-2">All done for today</MudText>
-  <MudText Class="mb-4">@_done cards reviewed in @_deck.Name.</MudText>
-  <MudButton Href="" Variant="Variant.Filled" Color="Color.Primary">Back to decks</MudButton>
+  <MudText Typo="Typo.h5" Class="mb-2">All done for now</MudText>
+  <MudText Class="mb-4">@_done cards reviewed in @Scope.</MudText>
+  <MudStack Row="true" Spacing="2">
+    <MudButton Href="./" Variant="Variant.Filled" Color="Color.Primary">Back to decks</MudButton>
+    @if (_moreNew > 0)
+    {
+      <MudButton OnClick="StudyMore" Variant="Variant.Outlined" Color="Color.Primary">Study @_moreNew more new cards</MudButton>
+    }
+  </MudStack>
 }
 else
 {
   var card = _queue[0];
+  <MudText Typo="Typo.caption" Class="mb-1">@Scope</MudText>
   <MudProgressLinear Value="_done" Max="_total" Color="Color.Primary" Class="mb-3" />
   <MudCard Class="mb-4">
     <MudCardContent Class="card-face">
@@ -69,6 +76,9 @@ else
   [Parameter]
   public string DeckId { get; set; } = default!;
 
+  [SupplyParameterFromQuery(Name = "tag")]
+  public string? Tag { get; set; }
+
   readonly DateOnly _today = DateOnly.FromDateTime(DateTime.Now);
   Deck? _deck;
   List<Card> _queue = [];
@@ -76,14 +86,19 @@ else
   bool _revealed;
   int _total;
   int _done;
+  int _newLimit = StudyQueue.DefaultNewCardsPerDay;
+  int _moreNew;
+
+  string Scope => Tag is null ? _deck!.Name : $"{_deck!.Name} · {Tag}";
 
   protected override async Task OnInitializedAsync()
   {
     _deck = await Decks.GetAsync(DeckId);
     if (_deck is not null)
     {
-      _queue = StudyQueue.Build(_deck, _today);
+      _queue = StudyQueue.Build(_deck, _today, _newLimit, Tag);
       _total = _queue.Count;
+      UpdateMoreNew();
     }
 
     _loading = false;
@@ -94,6 +109,7 @@ else
     var card = _queue[0];
     _queue.RemoveAt(0);
     Sm2Scheduler.Review(card.State, rating, _today);
+    _deck!.RecordReview(_today, rating);
     if (rating == Rating.Again)
     {
       _queue.Add(card);
@@ -104,6 +120,18 @@ else
     }
 
     _revealed = false;
-    await Decks.SaveAsync(_deck!);
+    UpdateMoreNew();
+    await Decks.SaveAsync(_deck);
   }
+
+  void StudyMore()
+  {
+    _newLimit += StudyQueue.DefaultNewCardsPerDay;
+    _queue = StudyQueue.Build(_deck!, _today, _newLimit, Tag);
+    _total += _queue.Count;
+    UpdateMoreNew();
+  }
+
+  void UpdateMoreNew() =>
+    _moreNew = _queue.Count > 0 ? 0 : StudyQueue.Build(_deck!, _today, _newLimit + StudyQueue.DefaultNewCardsPerDay, Tag).Count;
 }

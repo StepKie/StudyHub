@@ -37,4 +37,35 @@ public class StudyQueueTests
 
 		queue.Should().HaveCount(2);
 	}
+
+	[Fact]
+	public void Tag_restricts_cards_and_the_daily_new_count_to_that_section()
+	{
+		var anatomyDone = Card.Create("a1", "x", "Anatomy");
+		anatomyDone.State.Due = _today.AddDays(1);
+		anatomyDone.State.FirstReviewed = _today;
+		var anatomyNew = Card.Create("a2", "x", "Anatomy");
+		var numbersNew = Enumerable.Range(0, 3).Select(i => Card.Create($"n{i}", "x", "Numbers"));
+		var deck = Deck.Create("d", numbersNew.Prepend(anatomyNew).Prepend(anatomyDone));
+
+		var anatomy = StudyQueue.Build(deck, _today, newCardsPerDay: 1, tag: "Anatomy");
+		var numbers = StudyQueue.Build(deck, _today, newCardsPerDay: 2, tag: "Numbers");
+
+		anatomy.Should().BeEmpty();
+		numbers.Should().HaveCount(2);
+	}
+
+	[Fact]
+	public void HasWork_ignores_the_daily_limit_but_not_the_section()
+	{
+		var seen = Card.Create("s", "x", "Anatomy");
+		seen.State.Due = _today.AddDays(5);
+		seen.State.FirstReviewed = _today;
+		var unseen = Card.Create("u", "x", "Numbers");
+		var deck = Deck.Create("d", [seen, unseen]);
+
+		StudyQueue.HasWork(deck, _today, tag: "Numbers").Should().BeTrue();
+		StudyQueue.HasWork(deck, _today, tag: "Anatomy").Should().BeFalse();
+		StudyQueue.HasWork(deck, _today).Should().BeTrue();
+	}
 }
