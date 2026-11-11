@@ -1,0 +1,8 @@
+<Project>
+
+	<PropertyGroup>
+		<!-- Single source of truth for the project version; bump on each release, never in individual .csproj files. -->
+		<Version>0.1.0</Version>
+	</PropertyGroup>
+
+</Project>

@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/StudyHub.Core/StudyHub.Core.csproj" />
+    <Project Path="src/StudyHub.Tests/StudyHub.Tests.csproj" />
+    <Project Path="src/StudyHub.Web/StudyHub.Web.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,26 @@
+# Normalize line endings to LF in the repo and on checkout across every OS.
+# Modern Windows tooling (VS 2022, VS Code, Rider, PowerShell 7, git-for-windows) handles LF
+# without issue. Keeping everything as LF eliminates the mixed-EOL / "LF will be replaced by
+# CRLF" noise and avoids bogus diffs when files move between Windows, Linux CI, and containers.
+* text=auto eol=lf
+
+# Windows-native scripts that genuinely need CRLF.
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+
+# CSV fixtures normalize like source: readable diffs matter, and no test depends on their endings.
+*.csv       text eol=lf
+
+# Known-binary extensions — never touch, regardless of autodetection.
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.ico       binary
+*.pdf       binary
+*.zip       binary
+*.exe       binary
+*.dll       binary
+*.snk       binary
+*.pfx       binary
+*.gz        binary
