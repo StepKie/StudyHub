@@ -10,13 +10,13 @@
 else if (_deck is null)
 {
   <MudAlert Severity="Severity.Warning">Deck not found.</MudAlert>
-  <MudButton Href="" Class="mt-3">Back to decks</MudButton>
+  <MudButton Href="./" Class="mt-3">Back to decks</MudButton>
 }
 else if (_queue.Count == 0)
 {
   <MudText Typo="Typo.h5" Class="mb-2">All done for today</MudText>
   <MudText Class="mb-4">@_done cards reviewed in @_deck.Name.</MudText>
-  <MudButton Href="" Variant="Variant.Filled" Color="Color.Primary">Back to decks</MudButton>
+  <MudButton Href="./" Variant="Variant.Filled" Color="Color.Primary">Back to decks</MudButton>
 }
 else
 {
