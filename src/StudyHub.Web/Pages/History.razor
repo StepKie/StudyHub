@@ -1,0 +1,55 @@
+@page "/history"
+@inject IDeckRepository Decks
+
+<PageTitle>History</PageTitle>
+
+<MudText Typo="Typo.h5" Class="mb-4">History</MudText>
+
+@if (_decks is null)
+{
+  <MudProgressLinear Indeterminate="true" />
+}
+else if (_decks.Count == 0)
+{
+  <MudAlert Severity="Severity.Info">No decks yet.</MudAlert>
+}
+else
+{
+  <MudStack Spacing="4">
+    @foreach (var deck in _decks)
+    {
+      var days = Enumerable.Range(0, Days).Select(i => _today.AddDays(-i)).ToList();
+      var max = Math.Max(1, days.Max(d => DeckStatistics.ReviewsOn(deck, d)));
+      var streak = DeckStatistics.Streak(deck, _today);
+      <MudCard>
+        <MudCardContent>
+          <MudText Typo="Typo.h6">@deck.Name</MudText>
+          <MudText Typo="Typo.body2" Class="mb-3">
+            @deck.History.Sum(d => d.Reviews) reviews in total@(streak > 0 ? $" · {streak}-day streak" : "")
+          </MudText>
+          <MudStack Spacing="1">
+            @foreach (var day in days)
+            {
+              var stats = deck.History.FirstOrDefault(d => d.Date == day);
+              var reviews = stats?.Reviews ?? 0;
+              var correct = reviews == 0 ? "" : $" · {100 * (reviews - stats!.Again) / reviews}% not Again";
+              <div>
+                <MudText Typo="Typo.caption">@day.ToString("ddd d MMM") — @reviews reviews@(correct)</MudText>
+                <MudProgressLinear Value="reviews" Max="max" Color="Color.Primary" />
+              </div>
+            }
+          </MudStack>
+        </MudCardContent>
+      </MudCard>
+    }
+  </MudStack>
+}
+
+@code {
+  const int Days = 14;
+
+  readonly DateOnly _today = DateOnly.FromDateTime(DateTime.Now);
+  IReadOnlyList<Deck>? _decks;
+
+  protected override async Task OnInitializedAsync() => _decks = await Decks.GetAllAsync();
+}

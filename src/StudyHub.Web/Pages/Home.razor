@@ -19,16 +19,24 @@ else
   <MudStack Spacing="3">
     @foreach (var deck in _decks)
     {
-      var queue = StudyQueue.Build(deck, _today);
-      var due = queue.Count(c => !c.State.IsNew);
-      var fresh = queue.Count - due;
+      var tags = deck.GetTags();
+      var streak = DeckStatistics.Streak(deck, _today);
       <MudCard>
         <MudCardContent>
           <MudText Typo="Typo.h6">@deck.Name</MudText>
-          <MudText Typo="Typo.body2">@deck.Cards.Count cards · @due due · @fresh new</MudText>
+          <MudText Typo="Typo.body2">@Summary(deck, null)</MudText>
+          <MudText Typo="Typo.body2" Color="Color.Secondary">
+            @DeckStatistics.ReviewsOn(deck, _today) reviewed today@(streak > 1 ? $" · {streak}-day streak" : "")
+          </MudText>
         </MudCardContent>
         <MudCardActions>
-          <MudButton Href="@($"study/{deck.Id}")" Variant="Variant.Filled" Color="Color.Primary" Disabled="@(queue.Count == 0)">Study</MudButton>
+          <MudButton Href="@StudyHref(deck, null)" Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!StudyQueue.HasWork(deck, _today))">Study</MudButton>
+          @if (tags.Count > 1)
+          {
+            <MudButton OnClick="@(() => _expandedId = _expandedId == deck.Id ? null : deck.Id)">
+              Sections (@tags.Count)
+            </MudButton>
+          }
           <MudSpacer />
           @if (_confirmDeleteId == deck.Id)
           {
@@ -40,6 +48,24 @@ else
             <MudIconButton Icon="@Icons.Material.Filled.Delete" title="Delete deck" OnClick="@(() => _confirmDeleteId = deck.Id)" />
           }
         </MudCardActions>
+        @if (_expandedId == deck.Id)
+        {
+          <MudDivider />
+          <MudCardContent>
+            <MudStack Spacing="1">
+              @foreach (var tag in tags)
+              {
+                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                  <div>
+                    <MudText Typo="Typo.body1">@tag</MudText>
+                    <MudText Typo="Typo.caption">@Summary(deck, tag)</MudText>
+                  </div>
+                  <MudButton Href="@StudyHref(deck, tag)" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(!StudyQueue.HasWork(deck, _today, tag))">Study</MudButton>
+                </MudStack>
+              }
+            </MudStack>
+          </MudCardContent>
+        }
       </MudCard>
     }
   </MudStack>
@@ -49,8 +75,21 @@ else
   readonly DateOnly _today = DateOnly.FromDateTime(DateTime.Now);
   IReadOnlyList<Deck>? _decks;
   string? _confirmDeleteId;
+  string? _expandedId;
 
   protected override async Task OnInitializedAsync() => _decks = await Decks.GetAllAsync();
+
+  string Summary(Deck deck, string? tag)
+  {
+    var scope = tag is null ? deck.Cards : deck.Cards.Where(c => c.Tag == tag).ToList();
+    var due = scope.Count(c => !c.State.IsNew && c.State.Due <= _today);
+    var unseen = scope.Count(c => c.State.IsNew);
+
+    return $"{scope.Count} cards · {due} due · {unseen} new";
+  }
+
+  static string StudyHref(Deck deck, string? tag) =>
+    tag is null ? $"study/{deck.Id}" : $"study/{deck.Id}?tag={Uri.EscapeDataString(tag)}";
 
   async Task DeleteAsync(Deck deck)
   {
