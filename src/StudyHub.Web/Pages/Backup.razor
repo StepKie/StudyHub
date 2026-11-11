@@ -1,0 +1,73 @@
+@page "/backup"
+@inject IDeckRepository Decks
+@inject BrowserInterop Browser
+
+<PageTitle>Backup</PageTitle>
+
+<MudText Typo="Typo.h5" Class="mb-4">Backup</MudText>
+
+<MudText Class="mb-2">Your decks and progress live only in this browser. Save a backup file regularly, for example to iCloud Drive.</MudText>
+
+<MudStack Spacing="3" Class="mb-6">
+  <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ExportAsync">Download backup</MudButton>
+
+  <div>
+    <MudText Typo="Typo.subtitle2" Class="mb-1">Restore from backup (replaces decks with the same id)</MudText>
+    <InputFile OnChange="RestoreAsync" accept=".json" />
+  </div>
+</MudStack>
+
+@if (_message is not null)
+{
+  <MudAlert Severity="@_severity" Class="mb-4">@_message</MudAlert>
+}
+
+<MudText Typo="Typo.subtitle2" Class="mb-1">Browser storage protection</MudText>
+@if (_persistent)
+{
+  <MudAlert Severity="Severity.Success">The browser will not clear this data automatically.</MudAlert>
+}
+else
+{
+  <MudAlert Severity="Severity.Warning" Class="mb-2">
+    The browser may clear this data after a few weeks without use. On iPhone, add the app to the Home Screen (Share, Add to Home Screen) and keep making backups.
+  </MudAlert>
+  <MudButton OnClick="RequestPersistenceAsync">Ask the browser to protect it</MudButton>
+}
+
+@code {
+  const long MaxFileBytes = 100_000_000;
+
+  bool _persistent;
+  string? _message;
+  Severity _severity = Severity.Info;
+
+  protected override async Task OnInitializedAsync() => _persistent = await Browser.IsStoragePersistentAsync();
+
+  async Task ExportAsync()
+  {
+    var decks = await Decks.GetAllAsync();
+    await Browser.DownloadTextAsync($"studyhub-backup-{DateTime.Now:yyyy-MM-dd}.json", DeckBackup.Serialize(decks));
+  }
+
+  async Task RestoreAsync(InputFileChangeEventArgs e)
+  {
+    try
+    {
+      using var reader = new StreamReader(e.File.OpenReadStream(MaxFileBytes));
+      var decks = DeckBackup.Deserialize(await reader.ReadToEndAsync());
+      foreach (var deck in decks)
+      {
+        await Decks.SaveAsync(deck);
+      }
+
+      (_message, _severity) = ($"Restored {decks.Count} deck(s).", Severity.Success);
+    }
+    catch (Exception ex) when (ex is IOException or InvalidDataException or System.Text.Json.JsonException)
+    {
+      (_message, _severity) = ($"Could not restore: {ex.Message}", Severity.Error);
+    }
+  }
+
+  async Task RequestPersistenceAsync() => _persistent = await Browser.RequestPersistentStorageAsync();
+}

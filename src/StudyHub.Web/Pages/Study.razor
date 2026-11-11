@@ -1,0 +1,109 @@
+@page "/study/{DeckId}"
+@inject IDeckRepository Decks
+
+<PageTitle>Study</PageTitle>
+
+@if (_loading)
+{
+  <MudProgressLinear Indeterminate="true" />
+}
+else if (_deck is null)
+{
+  <MudAlert Severity="Severity.Warning">Deck not found.</MudAlert>
+  <MudButton Href="" Class="mt-3">Back to decks</MudButton>
+}
+else if (_queue.Count == 0)
+{
+  <MudText Typo="Typo.h5" Class="mb-2">All done for today</MudText>
+  <MudText Class="mb-4">@_done cards reviewed in @_deck.Name.</MudText>
+  <MudButton Href="" Variant="Variant.Filled" Color="Color.Primary">Back to decks</MudButton>
+}
+else
+{
+  var card = _queue[0];
+  <MudProgressLinear Value="_done" Max="_total" Color="Color.Primary" Class="mb-3" />
+  <MudCard Class="mb-4">
+    <MudCardContent Class="card-face">
+      <div>
+        <MudText Typo="Typo.h4">@card.Front</MudText>
+        @if (_revealed)
+        {
+          <MudDivider Class="my-4" />
+          <MudText Typo="Typo.h5">@card.Back</MudText>
+        }
+      </div>
+    </MudCardContent>
+  </MudCard>
+
+  @if (!_revealed)
+  {
+    <MudButton FullWidth="true" Size="Size.Large" Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => _revealed = true)">Show answer</MudButton>
+  }
+  else
+  {
+    <MudGrid Spacing="2">
+      @foreach (var (rating, color) in _buttons)
+      {
+        <MudItem xs="6" sm="3">
+          <MudButton FullWidth="true" Variant="Variant.Filled" Color="color" OnClick="@(() => RateAsync(rating))">
+            <span class="d-flex flex-column align-center">
+              <span>@rating</span>
+              <span class="mud-typography-caption">@IntervalFormat.Short(Sm2Scheduler.PreviewInterval(card.State, rating, _today))</span>
+            </span>
+          </MudButton>
+        </MudItem>
+      }
+    </MudGrid>
+  }
+}
+
+@code {
+  static readonly (Rating Rating, Color Color)[] _buttons =
+  [
+    (Rating.Again, Color.Error),
+    (Rating.Hard, Color.Warning),
+    (Rating.Good, Color.Success),
+    (Rating.Easy, Color.Info),
+  ];
+
+  [Parameter]
+  public string DeckId { get; set; } = default!;
+
+  readonly DateOnly _today = DateOnly.FromDateTime(DateTime.Now);
+  Deck? _deck;
+  List<Card> _queue = [];
+  bool _loading = true;
+  bool _revealed;
+  int _total;
+  int _done;
+
+  protected override async Task OnInitializedAsync()
+  {
+    _deck = await Decks.GetAsync(DeckId);
+    if (_deck is not null)
+    {
+      _queue = StudyQueue.Build(_deck, _today);
+      _total = _queue.Count;
+    }
+
+    _loading = false;
+  }
+
+  async Task RateAsync(Rating rating)
+  {
+    var card = _queue[0];
+    _queue.RemoveAt(0);
+    Sm2Scheduler.Review(card.State, rating, _today);
+    if (rating == Rating.Again)
+    {
+      _queue.Add(card);
+    }
+    else
+    {
+      _done++;
+    }
+
+    _revealed = false;
+    await Decks.SaveAsync(_deck!);
+  }
+}

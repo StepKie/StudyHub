@@ -1,0 +1,62 @@
+@page "/import"
+@inject IDeckRepository Decks
+@inject NavigationManager Nav
+
+<PageTitle>Import cards</PageTitle>
+
+<MudText Typo="Typo.h5" Class="mb-2">Import cards</MudText>
+<MudText Typo="Typo.body2" Class="mb-4">
+  Anki "Notes in Plain Text" export or a CSV / TSV file: column 1 is the front, column 2 the back, an optional third column the tag.
+</MudText>
+
+<InputFile OnChange="OnFileSelectedAsync" accept=".txt,.csv,.tsv" class="mb-4" />
+
+@if (_error is not null)
+{
+  <MudAlert Severity="Severity.Error" Class="my-2">@_error</MudAlert>
+}
+
+@if (_result is not null)
+{
+  <MudTextField @bind-Value="_deckName" Label="Deck name" Class="my-3" />
+  <MudText Typo="Typo.subtitle2">@_result.Cards.Count cards found@(_result.SkippedRows > 0 ? $", {_result.SkippedRows} rows skipped" : "")</MudText>
+  <MudList T="string" Dense="true" Class="mb-3">
+    @foreach (var card in _result.Cards.Take(5))
+    {
+      <MudListItem T="string">@card.Front → @card.Back</MudListItem>
+    }
+  </MudList>
+  <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(_result.Cards.Count == 0 || string.IsNullOrWhiteSpace(_deckName))" OnClick="CreateDeckAsync">
+    Create deck
+  </MudButton>
+}
+
+@code {
+  const long MaxFileBytes = 10_000_000;
+
+  ImportResult? _result;
+  string _deckName = string.Empty;
+  string? _error;
+
+  async Task OnFileSelectedAsync(InputFileChangeEventArgs e)
+  {
+    _error = null;
+    _result = null;
+    try
+    {
+      using var reader = new StreamReader(e.File.OpenReadStream(MaxFileBytes));
+      _result = CardTextImporter.Parse(await reader.ReadToEndAsync());
+      _deckName = Path.GetFileNameWithoutExtension(e.File.Name);
+    }
+    catch (IOException ex)
+    {
+      _error = ex.Message;
+    }
+  }
+
+  async Task CreateDeckAsync()
+  {
+    await Decks.SaveAsync(Deck.Create(_deckName.Trim(), _result!.Cards));
+    Nav.NavigateTo("");
+  }
+}

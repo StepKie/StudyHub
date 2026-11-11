@@ -1,0 +1,61 @@
+﻿@page "/"
+@inject IDeckRepository Decks
+
+<PageTitle>StudyHub</PageTitle>
+
+<MudText Typo="Typo.h5" Class="mb-4">Decks</MudText>
+
+@if (_decks is null)
+{
+  <MudProgressLinear Indeterminate="true" />
+}
+else if (_decks.Count == 0)
+{
+  <MudAlert Severity="Severity.Info" Class="mb-4">No decks yet. Import an Anki text export or a CSV to get started.</MudAlert>
+  <MudButton Href="import" Variant="Variant.Filled" Color="Color.Primary">Import cards</MudButton>
+}
+else
+{
+  <MudStack Spacing="3">
+    @foreach (var deck in _decks)
+    {
+      var queue = StudyQueue.Build(deck, _today);
+      var due = queue.Count(c => !c.State.IsNew);
+      var fresh = queue.Count - due;
+      <MudCard>
+        <MudCardContent>
+          <MudText Typo="Typo.h6">@deck.Name</MudText>
+          <MudText Typo="Typo.body2">@deck.Cards.Count cards · @due due · @fresh new</MudText>
+        </MudCardContent>
+        <MudCardActions>
+          <MudButton Href="@($"study/{deck.Id}")" Variant="Variant.Filled" Color="Color.Primary" Disabled="@(queue.Count == 0)">Study</MudButton>
+          <MudSpacer />
+          @if (_confirmDeleteId == deck.Id)
+          {
+            <MudButton Color="Color.Error" OnClick="@(() => DeleteAsync(deck))">Delete deck and progress?</MudButton>
+            <MudButton OnClick="@(() => _confirmDeleteId = null)">Cancel</MudButton>
+          }
+          else
+          {
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" title="Delete deck" OnClick="@(() => _confirmDeleteId = deck.Id)" />
+          }
+        </MudCardActions>
+      </MudCard>
+    }
+  </MudStack>
+}
+
+@code {
+  readonly DateOnly _today = DateOnly.FromDateTime(DateTime.Now);
+  IReadOnlyList<Deck>? _decks;
+  string? _confirmDeleteId;
+
+  protected override async Task OnInitializedAsync() => _decks = await Decks.GetAllAsync();
+
+  async Task DeleteAsync(Deck deck)
+  {
+    await Decks.DeleteAsync(deck.Id);
+    _confirmDeleteId = null;
+    _decks = await Decks.GetAllAsync();
+  }
+}
