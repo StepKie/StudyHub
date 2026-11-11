@@ -88,7 +88,6 @@ else
   bool _revealed;
   int _total;
   int _done;
-  int _newLimit = StudyQueue.DefaultNewCardsPerDay;
   int _moreNew;
 
   DotNetObjectReference<Study>? _self;
@@ -142,7 +141,7 @@ else
     _deck = await Decks.GetAsync(DeckId);
     if (_deck is not null)
     {
-      _queue = StudyQueue.Build(_deck, _today, _newLimit, Tag);
+      _queue = StudyQueue.Build(_deck, _today, tag: Tag);
       _total = _queue.Count;
       UpdateMoreNew();
     }
@@ -172,12 +171,11 @@ else
 
   void StudyMore()
   {
-    _newLimit += StudyQueue.DefaultNewCardsPerDay;
-    _queue = StudyQueue.Build(_deck!, _today, _newLimit, Tag);
+    _queue = StudyQueue.Build(_deck!, _today, tag: Tag);
     _total += _queue.Count;
     UpdateMoreNew();
   }
 
   void UpdateMoreNew() =>
-    _moreNew = _queue.Count > 0 ? 0 : StudyQueue.Build(_deck!, _today, _newLimit + StudyQueue.DefaultNewCardsPerDay, Tag).Count;
+    _moreNew = _queue.Count > 0 ? 0 : StudyQueue.Build(_deck!, _today, tag: Tag).Count;
 }
