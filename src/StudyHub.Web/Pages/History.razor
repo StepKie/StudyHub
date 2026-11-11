@@ -1,9 +1,9 @@
 @page "/history"
 @inject IDeckRepository Decks
 
-<PageTitle>History</PageTitle>
+<PageTitle>@L["Nav_History"]</PageTitle>
 
-<MudText Typo="Typo.h5" Class="mb-4">History</MudText>
+<MudText Typo="Typo.h5" Class="mb-4">@L["Nav_History"]</MudText>
 
 @if (_decks is null)
 {
@@ -11,7 +11,7 @@
 }
 else if (_decks.Count == 0)
 {
-  <MudAlert Severity="Severity.Info">No decks yet.</MudAlert>
+  <MudAlert Severity="Severity.Info">@L["History_NoDecks"]</MudAlert>
 }
 else
 {
@@ -25,16 +25,16 @@ else
         <MudCardContent>
           <MudText Typo="Typo.h6">@deck.Name</MudText>
           <MudText Typo="Typo.body2" Class="mb-3">
-            @deck.History.Sum(d => d.Reviews) reviews in total@(streak > 0 ? $" · {streak}-day streak" : "")
+            @L.Plural("History_Total", deck.History.Sum(d => d.Reviews))@(streak > 0 ? " · " + L.Plural("Home_Streak", streak) : "")
           </MudText>
           <MudStack Spacing="1">
             @foreach (var day in days)
             {
               var reviews = DeckStatistics.ReviewsOn(deck, day);
-              var correct = reviews == 0 ? "" : $" · {100 * (reviews - DeckStatistics.AgainOn(deck, day)) / reviews}% not Again";
+              var notAgain = reviews == 0 ? "" : " · " + L["History_NotAgain", 100 * (reviews - DeckStatistics.AgainOn(deck, day)) / reviews];
               var sections = DeckStatistics.BySection(deck, day).Where(s => s.Tag is not null).ToList();
               <div>
-                <MudText Typo="Typo.caption">@day.ToString("ddd d MMM") — @reviews reviews@(correct)</MudText>
+                <MudText Typo="Typo.caption">@day.ToString("ddd d MMM") — @L.Plural("Home_Reviews", reviews)@notAgain</MudText>
                 <MudProgressLinear Value="reviews" Max="max" Color="Color.Primary" />
                 @foreach (var (tag, count) in sections)
                 {

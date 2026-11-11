@@ -3,7 +3,7 @@
 @inject IDeckRepository Decks
 @inject IJSRuntime Js
 
-<PageTitle>Study</PageTitle>
+<PageTitle>@L["Home_Study"]</PageTitle>
 
 @if (_loading)
 {
@@ -11,18 +11,18 @@
 }
 else if (_deck is null)
 {
-  <MudAlert Severity="Severity.Warning">Deck not found.</MudAlert>
-  <MudButton Href="./" Class="mt-3">Back to decks</MudButton>
+  <MudAlert Severity="Severity.Warning">@L["Study_NotFound"]</MudAlert>
+  <MudButton Href="./" Class="mt-3">@L["Study_BackToDecks"]</MudButton>
 }
 else if (_queue.Count == 0)
 {
-  <MudText Typo="Typo.h5" Class="mb-2">All done for now</MudText>
-  <MudText Class="mb-4">@_done cards reviewed in @Scope.</MudText>
+  <MudText Typo="Typo.h5" Class="mb-2">@L["Study_AllDone"]</MudText>
+  <MudText Class="mb-4">@L.Plural("Study_Reviewed", _done, Scope)</MudText>
   <MudStack Row="true" Spacing="2">
-    <MudButton Href="./" Variant="Variant.Filled" Color="Color.Primary">Back to decks</MudButton>
+    <MudButton Href="./" Variant="Variant.Filled" Color="Color.Primary">@L["Study_BackToDecks"]</MudButton>
     @if (_moreNew > 0)
     {
-      <MudButton OnClick="StudyMore" Variant="Variant.Outlined" Color="Color.Primary">Study @_moreNew more new cards</MudButton>
+      <MudButton OnClick="StudyMore" Variant="Variant.Outlined" Color="Color.Primary">@L.Plural("Study_More", _moreNew)</MudButton>
     }
   </MudStack>
 }
@@ -46,7 +46,7 @@ else
 
   @if (!_revealed)
   {
-    <MudButton FullWidth="true" Size="Size.Large" Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => _revealed = true)">Show answer (Space)</MudButton>
+    <MudButton FullWidth="true" Size="Size.Large" Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => _revealed = true)">@L["Study_ShowAnswer"]</MudButton>
   }
   else
   {
@@ -56,8 +56,8 @@ else
         <MudItem xs="6" sm="3">
           <MudButton FullWidth="true" Variant="Variant.Filled" Color="color" OnClick="@(() => RateAsync(rating))">
             <span class="d-flex flex-column align-center">
-              <span>@((int)rating + 1) · @rating</span>
-              <span class="mud-typography-caption">@IntervalFormat.Short(Sm2Scheduler.PreviewInterval(card.State, rating, _today))</span>
+              <span>@((int)rating + 1) · @L[$"Rating_{rating}"]</span>
+              <span class="mud-typography-caption">@IntervalFormat.Short(Sm2Scheduler.PreviewInterval(card.State, rating, _today), L)</span>
             </span>
           </MudButton>
         </MudItem>
@@ -93,6 +93,19 @@ else
   DotNetObjectReference<Study>? _self;
 
   string Scope => Tag is null ? _deck!.Name : $"{_deck!.Name} · {Tag}";
+
+  protected override async Task OnInitializedAsync()
+  {
+    _deck = await Decks.GetAsync(DeckId);
+    if (_deck is not null)
+    {
+      _queue = StudyQueue.Build(_deck, _today, tag: Tag);
+      _total = _queue.Count;
+      UpdateMoreNew();
+    }
+
+    _loading = false;
+  }
 
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
@@ -134,19 +147,6 @@ else
   {
     await Js.InvokeVoidAsync("studyhubKeys.unregister");
     _self?.Dispose();
-  }
-
-  protected override async Task OnInitializedAsync()
-  {
-    _deck = await Decks.GetAsync(DeckId);
-    if (_deck is not null)
-    {
-      _queue = StudyQueue.Build(_deck, _today, tag: Tag);
-      _total = _queue.Count;
-      UpdateMoreNew();
-    }
-
-    _loading = false;
   }
 
   async Task RateAsync(Rating rating)

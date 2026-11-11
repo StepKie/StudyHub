@@ -37,6 +37,9 @@ DOTNET_WATCH_RESTART_ON_RUDE_EDIT=true dotnet watch --project src/StudyHub.Web r
 - `_camelCase` private fields, PascalCase types and public members.
 - Follow `.editorconfig`.
 - Core has no browser or UI dependency; anything touching IndexedDB or JS interop lives in `StudyHub.Web/Services`.
+- All UI text goes through `IStringLocalizer<SharedResource>` (`L["Key"]`), with the key in both `SharedResource.resx` (English) and `SharedResource.de.resx`; `LocalizationTests` enforces matching keys and placeholders.
+- Counts use `L.Plural("Key", n)`, which falls back to a `Key_One` entry when n is 1.
+- German is the default language (stored choice in localStorage `studyhub.culture`); the app bar toggles to English and reloads.
 - Learner data never leaves the device. Any feature that would change that (sync, login) needs an explicit decision first.
 - Do not commit course vocabulary (for example the Leipzig terminology list). Users import it at runtime.
 

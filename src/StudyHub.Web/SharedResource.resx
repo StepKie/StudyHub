@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="App_Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="Nav_Decks" xml:space="preserve">
+    <value>Decks</value>
+  </data>
+  <data name="Nav_History" xml:space="preserve">
+    <value>History</value>
+  </data>
+  <data name="Nav_Import" xml:space="preserve">
+    <value>Import cards</value>
+  </data>
+  <data name="Nav_Backup" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Home_NoDecks" xml:space="preserve">
+    <value>No decks yet. Import an Anki text export or a CSV to get started.</value>
+  </data>
+  <data name="Home_Study" xml:space="preserve">
+    <value>Study</value>
+  </data>
+  <data name="Home_Sections" xml:space="preserve">
+    <value>Sections ({0})</value>
+  </data>
+  <data name="Home_DeleteConfirm" xml:space="preserve">
+    <value>Delete deck and progress?</value>
+  </data>
+  <data name="Home_DeleteDeck" xml:space="preserve">
+    <value>Delete deck</value>
+  </data>
+  <data name="Home_ReviewsToday" xml:space="preserve">
+    <value>{0} reviews today</value>
+  </data>
+  <data name="Home_Streak" xml:space="preserve">
+    <value>{0}-day streak</value>
+  </data>
+  <data name="Home_Today" xml:space="preserve">
+    <value>Today: {0}</value>
+  </data>
+  <data name="Home_Cards" xml:space="preserve">
+    <value>{0} cards</value>
+  </data>
+  <data name="Home_Due" xml:space="preserve">
+    <value>{0} due</value>
+  </data>
+  <data name="Home_New" xml:space="preserve">
+    <value>{0} new</value>
+  </data>
+  <data name="Home_StartedToday" xml:space="preserve">
+    <value>{0} started today</value>
+  </data>
+  <data name="Home_NextReview" xml:space="preserve">
+    <value>next review {0}</value>
+  </data>
+  <data name="Home_Started" xml:space="preserve">
+    <value>{0} started</value>
+  </data>
+  <data name="Home_Reviews" xml:space="preserve">
+    <value>{0} reviews</value>
+  </data>
+  <data name="Rel_Today" xml:space="preserve">
+    <value>today</value>
+  </data>
+  <data name="Rel_Tomorrow" xml:space="preserve">
+    <value>tomorrow</value>
+  </data>
+  <data name="Rel_InDays" xml:space="preserve">
+    <value>in {0} days</value>
+  </data>
+  <data name="Study_NotFound" xml:space="preserve">
+    <value>Deck not found.</value>
+  </data>
+  <data name="Study_BackToDecks" xml:space="preserve">
+    <value>Back to decks</value>
+  </data>
+  <data name="Study_AllDone" xml:space="preserve">
+    <value>All done for now</value>
+  </data>
+  <data name="Study_Reviewed" xml:space="preserve">
+    <value>{0} cards reviewed in {1}.</value>
+  </data>
+  <data name="Study_More" xml:space="preserve">
+    <value>Study {0} more new cards</value>
+  </data>
+  <data name="Study_ShowAnswer" xml:space="preserve">
+    <value>Show answer (Space)</value>
+  </data>
+  <data name="Rating_Again" xml:space="preserve">
+    <value>Again</value>
+  </data>
+  <data name="Rating_Hard" xml:space="preserve">
+    <value>Hard</value>
+  </data>
+  <data name="Rating_Good" xml:space="preserve">
+    <value>Good</value>
+  </data>
+  <data name="Rating_Easy" xml:space="preserve">
+    <value>Easy</value>
+  </data>
+  <data name="Interval_LessThanDay" xml:space="preserve">
+    <value>&lt;1d</value>
+  </data>
+  <data name="Interval_Days" xml:space="preserve">
+    <value>{0}d</value>
+  </data>
+  <data name="Interval_Months" xml:space="preserve">
+    <value>{0}mo</value>
+  </data>
+  <data name="Interval_Years" xml:space="preserve">
+    <value>{0}y</value>
+  </data>
+  <data name="Import_Help" xml:space="preserve">
+    <value>Anki "Notes in Plain Text" export or a CSV / TSV file: column 1 is the front, column 2 the back, an optional third column the tag.</value>
+  </data>
+  <data name="Import_DeckName" xml:space="preserve">
+    <value>Deck name</value>
+  </data>
+  <data name="Import_Found" xml:space="preserve">
+    <value>{0} cards found</value>
+  </data>
+  <data name="Import_Create" xml:space="preserve">
+    <value>Create deck</value>
+  </data>
+  <data name="Backup_Intro" xml:space="preserve">
+    <value>Your decks and progress live only in this browser. Save a backup file regularly, for example to iCloud Drive.</value>
+  </data>
+  <data name="Backup_Download" xml:space="preserve">
+    <value>Download backup</value>
+  </data>
+  <data name="Backup_RestoreHeading" xml:space="preserve">
+    <value>Restore from backup (replaces decks with the same id)</value>
+  </data>
+  <data name="Backup_Restored" xml:space="preserve">
+    <value>Restored {0} deck(s).</value>
+  </data>
+  <data name="Backup_RestoreFailed" xml:space="preserve">
+    <value>Could not restore: {0}</value>
+  </data>
+  <data name="Backup_StorageHeading" xml:space="preserve">
+    <value>Browser storage protection</value>
+  </data>
+  <data name="Backup_Protected" xml:space="preserve">
+    <value>The browser will not clear this data automatically.</value>
+  </data>
+  <data name="Backup_NotProtected" xml:space="preserve">
+    <value>The browser may clear this data after a few weeks without use. On iPhone, add the app to the Home Screen (Share, Add to Home Screen) and keep making backups.</value>
+  </data>
+  <data name="Backup_AskProtect" xml:space="preserve">
+    <value>Ask the browser to protect it</value>
+  </data>
+  <data name="History_NoDecks" xml:space="preserve">
+    <value>No decks yet.</value>
+  </data>
+  <data name="History_Total" xml:space="preserve">
+    <value>{0} reviews in total</value>
+  </data>
+  <data name="Home_Cards_One" xml:space="preserve">
+    <value>{0} card</value>
+  </data>
+  <data name="Home_ReviewsToday_One" xml:space="preserve">
+    <value>{0} review today</value>
+  </data>
+  <data name="Home_Streak_One" xml:space="preserve">
+    <value>{0}-day streak</value>
+  </data>
+  <data name="Home_Reviews_One" xml:space="preserve">
+    <value>{0} review</value>
+  </data>
+  <data name="History_Total_One" xml:space="preserve">
+    <value>{0} review in total</value>
+  </data>
+  <data name="Study_More_One" xml:space="preserve">
+    <value>Study {0} more new card</value>
+  </data>
+  <data name="Study_Reviewed_One" xml:space="preserve">
+    <value>{0} card reviewed in {1}.</value>
+  </data>
+  <data name="Import_Found_One" xml:space="preserve">
+    <value>{0} card found</value>
+  </data>
+  <data name="Import_Skipped" xml:space="preserve">
+    <value>{0} rows skipped</value>
+  </data>
+  <data name="Import_Skipped_One" xml:space="preserve">
+    <value>{0} row skipped</value>
+  </data>
+  <data name="History_NotAgain" xml:space="preserve">
+    <value>{0}% not Again</value>
+  </data>
+  <data name="NotFound_Title" xml:space="preserve">
+    <value>Not Found</value>
+  </data>
+  <data name="NotFound_Text" xml:space="preserve">
+    <value>Sorry, the content you are looking for does not exist.</value>
+  </data>
+  <data name="Legend_Due" xml:space="preserve">
+    <value>due</value>
+  </data>
+  <data name="Legend_DueText" xml:space="preserve">
+    <value>studied cards whose review date has come</value>
+  </data>
+  <data name="Legend_New" xml:space="preserve">
+    <value>new</value>
+  </data>
+  <data name="Legend_NewText" xml:space="preserve">
+    <value>cards not studied yet</value>
+  </data>
+  <data name="Legend_Started" xml:space="preserve">
+    <value>started</value>
+  </data>
+  <data name="Legend_StartedText" xml:space="preserve">
+    <value>cards first seen today</value>
+  </data>
+  <data name="Legend_Reviews" xml:space="preserve">
+    <value>reviews</value>
+  </data>
+  <data name="Legend_ReviewsText" xml:space="preserve">
+    <value>every rating you gave today (an Again repeat counts again)</value>
+  </data>
+</root>

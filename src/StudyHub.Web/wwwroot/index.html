@@ -21,20 +21,33 @@
 
 <body>
     <div id="app">
-        <div class="boot-splash">Loading&hellip;</div>
+        <div class="boot-splash" data-i18n="loading">Loading&hellip;</div>
     </div>
 
     <div id="blazor-error-ui">
-        An unhandled error has occurred.
-        <a href="." class="reload">Reload</a>
+        <span data-i18n="error">An unhandled error has occurred.</span>
+        <a href="." class="reload" data-i18n="reload">Reload</a>
         <span class="dismiss">🗙</span>
     </div>
 
     <div id="sw-update-banner" style="display:none">
-        A new version is available.
-        <button onclick="applyUpdate()">Reload to update</button>
+        <span data-i18n="update">A new version is available.</span>
+        <button onclick="applyUpdate()" data-i18n="updateButton">Reload to update</button>
     </div>
 
+    <script>
+        // Static texts shown before (or without) the app itself; the language matches the app's stored choice, German by default.
+        (() => {
+            const T = {
+                de: { loading: 'Wird geladen…', error: 'Ein unerwarteter Fehler ist aufgetreten.', reload: 'Neu laden', update: 'Eine neue Version ist verfügbar.', updateButton: 'Zum Aktualisieren neu laden' },
+                en: { loading: 'Loading…', error: 'An unhandled error has occurred.', reload: 'Reload', update: 'A new version is available.', updateButton: 'Reload to update' },
+            };
+            let language = 'de';
+            try { language = localStorage.getItem('studyhub.culture') in T ? localStorage.getItem('studyhub.culture') : 'de'; } catch { }
+            document.documentElement.lang = language;
+            document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = T[language][el.dataset.i18n]; });
+        })();
+    </script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
     <script src="js/idb.js"></script>
     <script src="js/interop.js"></script>
