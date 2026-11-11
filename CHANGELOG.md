@@ -1,3 +1,16 @@
+## [0.1.1](https://github.com/StepKie/StudyHub/releases/tag/0.1.1) — 2026-11-11
+
+### New Features
+
+- **German and English** — the app starts in German; switch with the DE / EN button in the top bar. In German, decks are called "Lernsets" and sections "Teilsets".
+- **Keyboard shortcuts** — Space shows the answer, 1 to 4 rate Again, Hard, Good and Easy. Tapping anywhere on the page also shows the answer.
+- **What you studied today** — each deck lists the sections you worked on today, and every section shows the cards started today, the reviews and when the next review is due. A legend explains the terms.
+- **Study as much as you like** — there is no daily limit any more; every session offers the next 20 new cards.
+
+### Bugfixes
+
+- **Home and "Back to decks" work again** — the Home icon and the "Back to decks" buttons did nothing.
+
 ## [0.1.0](https://github.com/StepKie/StudyHub/releases/tag/0.1.0) — 2026-11-11
 
 ### New Features
