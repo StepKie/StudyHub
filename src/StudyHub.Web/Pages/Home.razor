@@ -3,7 +3,8 @@
 
 <PageTitle>StudyHub</PageTitle>
 
-<MudText Typo="Typo.h5" Class="mb-4">Decks</MudText>
+<MudText Typo="Typo.h5" Class="mb-1">Decks</MudText>
+<MudText Typo="Typo.caption" Class="mb-4">due: studied cards whose review date has come · new: not studied yet · started: first seen today · reviews: every rating you gave today (an Again repeat counts again)</MudText>
 
 @if (_decks is null)
 {
@@ -26,8 +27,12 @@ else
           <MudText Typo="Typo.h6">@deck.Name</MudText>
           <MudText Typo="Typo.body2">@Summary(deck, null)</MudText>
           <MudText Typo="Typo.body2" Color="Color.Secondary">
-            @DeckStatistics.ReviewsOn(deck, _today) reviewed today@(streak > 1 ? $" · {streak}-day streak" : "")
+            @DeckStatistics.ReviewsOn(deck, _today) reviews today@(streak > 1 ? $" · {streak}-day streak" : "")
           </MudText>
+          @if (TodaySections(deck) is { Length: > 0 } sections)
+          {
+            <MudText Typo="Typo.caption">Today: @sections</MudText>
+          }
         </MudCardContent>
         <MudCardActions>
           <MudButton Href="@StudyHref(deck, null)" Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!StudyQueue.HasWork(deck, _today))">Study</MudButton>
@@ -85,8 +90,39 @@ else
     var due = scope.Count(c => !c.State.IsNew && c.State.Due <= _today);
     var unseen = scope.Count(c => c.State.IsNew);
 
-    return $"{scope.Count} cards · {due} due · {unseen} new";
+    var parts = new List<string> { $"{scope.Count} cards", $"{due} due", $"{unseen} new" };
+    var started = scope.Count(c => c.State.FirstReviewed == _today);
+    if (started > 0)
+    {
+      parts.Add($"{started} started today");
+    }
+
+    var reviewedToday = DeckStatistics.ReviewsOn(deck, _today, tag);
+    if (tag is not null && reviewedToday > 0)
+    {
+      parts.Add($"{reviewedToday} reviews today");
+    }
+
+    if (due == 0 && DeckStatistics.NextDue(deck, tag) is { } next)
+    {
+      parts.Add($"next review {Relative(next)}");
+    }
+
+    return string.Join(" · ", parts);
   }
+
+  string Relative(DateOnly date) => (date.DayNumber - _today.DayNumber) switch
+  {
+    <= 0 => "today",
+    1 => "tomorrow",
+    var days => $"in {days} days",
+  };
+
+  string TodaySections(Deck deck) => string.Join(", ", deck
+    .GetTags()
+    .Select(tag => (Tag: tag, Reviews: DeckStatistics.ReviewsOn(deck, _today, tag), Started: deck.Cards.Count(c => c.Tag == tag && c.State.FirstReviewed == _today)))
+    .Where(s => s.Reviews > 0 || s.Started > 0)
+    .Select(s => $"{s.Tag} ({string.Join(" · ", new[] { s.Started > 0 ? $"{s.Started} started" : null, s.Reviews > 0 ? $"{s.Reviews} reviews" : null }.OfType<string>())})"));
 
   static string StudyHref(Deck deck, string? tag) =>
     tag is null ? $"study/{deck.Id}" : $"study/{deck.Id}?tag={Uri.EscapeDataString(tag)}";

@@ -30,12 +30,16 @@ else
           <MudStack Spacing="1">
             @foreach (var day in days)
             {
-              var stats = deck.History.FirstOrDefault(d => d.Date == day);
-              var reviews = stats?.Reviews ?? 0;
-              var correct = reviews == 0 ? "" : $" · {100 * (reviews - stats!.Again) / reviews}% not Again";
+              var reviews = DeckStatistics.ReviewsOn(deck, day);
+              var correct = reviews == 0 ? "" : $" · {100 * (reviews - DeckStatistics.AgainOn(deck, day)) / reviews}% not Again";
+              var sections = DeckStatistics.BySection(deck, day).Where(s => s.Tag is not null).ToList();
               <div>
                 <MudText Typo="Typo.caption">@day.ToString("ddd d MMM") — @reviews reviews@(correct)</MudText>
                 <MudProgressLinear Value="reviews" Max="max" Color="Color.Primary" />
+                @foreach (var (tag, count) in sections)
+                {
+                  <MudText Typo="Typo.caption" Color="Color.Secondary" Class="d-block">@tag: @count</MudText>
+                }
               </div>
             }
           </MudStack>

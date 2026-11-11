@@ -155,7 +155,7 @@ else
     var card = _queue[0];
     _queue.RemoveAt(0);
     Sm2Scheduler.Review(card.State, rating, _today);
-    _deck!.RecordReview(_today, rating);
+    _deck!.RecordReview(_today, rating, card.Tag);
     if (rating == Rating.Again)
     {
       _queue.Add(card);
