@@ -2,17 +2,17 @@
 @inject IDeckRepository Decks
 @inject BrowserInterop Browser
 
-<PageTitle>Backup</PageTitle>
+<PageTitle>@L["Nav_Backup"]</PageTitle>
 
-<MudText Typo="Typo.h5" Class="mb-4">Backup</MudText>
+<MudText Typo="Typo.h5" Class="mb-4">@L["Nav_Backup"]</MudText>
 
-<MudText Class="mb-2">Your decks and progress live only in this browser. Save a backup file regularly, for example to iCloud Drive.</MudText>
+<MudText Class="mb-2">@L["Backup_Intro"]</MudText>
 
 <MudStack Spacing="3" Class="mb-6">
-  <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ExportAsync">Download backup</MudButton>
+  <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ExportAsync">@L["Backup_Download"]</MudButton>
 
   <div>
-    <MudText Typo="Typo.subtitle2" Class="mb-1">Restore from backup (replaces decks with the same id)</MudText>
+    <MudText Typo="Typo.subtitle2" Class="mb-1">@L["Backup_RestoreHeading"]</MudText>
     <InputFile OnChange="RestoreAsync" accept=".json" />
   </div>
 </MudStack>
@@ -22,17 +22,15 @@
   <MudAlert Severity="@_severity" Class="mb-4">@_message</MudAlert>
 }
 
-<MudText Typo="Typo.subtitle2" Class="mb-1">Browser storage protection</MudText>
+<MudText Typo="Typo.subtitle2" Class="mb-1">@L["Backup_StorageHeading"]</MudText>
 @if (_persistent)
 {
-  <MudAlert Severity="Severity.Success">The browser will not clear this data automatically.</MudAlert>
+  <MudAlert Severity="Severity.Success">@L["Backup_Protected"]</MudAlert>
 }
 else
 {
-  <MudAlert Severity="Severity.Warning" Class="mb-2">
-    The browser may clear this data after a few weeks without use. On iPhone, add the app to the Home Screen (Share, Add to Home Screen) and keep making backups.
-  </MudAlert>
-  <MudButton OnClick="RequestPersistenceAsync">Ask the browser to protect it</MudButton>
+  <MudAlert Severity="Severity.Warning" Class="mb-2">@L["Backup_NotProtected"]</MudAlert>
+  <MudButton OnClick="RequestPersistenceAsync">@L["Backup_AskProtect"]</MudButton>
 }
 
 @code {
@@ -61,11 +59,11 @@ else
         await Decks.SaveAsync(deck);
       }
 
-      (_message, _severity) = ($"Restored {decks.Count} deck(s).", Severity.Success);
+      (_message, _severity) = (L["Backup_Restored", decks.Count], Severity.Success);
     }
     catch (Exception ex) when (ex is IOException or InvalidDataException or System.Text.Json.JsonException)
     {
-      (_message, _severity) = ($"Could not restore: {ex.Message}", Severity.Error);
+      (_message, _severity) = (L["Backup_RestoreFailed", ex.Message], Severity.Error);
     }
   }
 

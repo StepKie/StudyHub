@@ -14,3 +14,9 @@ window.studyhubStorage = {
     isPersistent: async () => !!navigator.storage?.persisted && await navigator.storage.persisted(),
     request: async () => !!navigator.storage?.persist && await navigator.storage.persist(),
 };
+
+window.studyhubSettings = {
+    get: key => localStorage.getItem(key),
+    set: (key, value) => localStorage.setItem(key, value),
+    setLanguage: language => { document.documentElement.lang = language; },
+};

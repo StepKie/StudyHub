@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.JSInterop;
 using MudBlazor.Services;
 using StudyHub.Core.Flashcards;
 using StudyHub.Web;
@@ -10,7 +11,12 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddMudServices();
+builder.Services.AddLocalization();
 builder.Services.AddScoped<BrowserInterop>();
+builder.Services.AddScoped<LanguageService>();
 builder.Services.AddScoped<IDeckRepository, IndexedDbDeckRepository>();
 
-await builder.Build().RunAsync();
+var host = builder.Build();
+LanguageService.ApplyStored((IJSInProcessRuntime)host.Services.GetRequiredService<IJSRuntime>());
+
+await host.RunAsync();

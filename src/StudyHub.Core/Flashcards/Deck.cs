@@ -24,12 +24,12 @@ public sealed class Deck
 		.Distinct()
 		.ToList();
 
-	public void RecordReview(DateOnly today, Rating rating)
+	public void RecordReview(DateOnly today, Rating rating, string? tag = null)
 	{
-		var day = History.FirstOrDefault(d => d.Date == today);
+		var day = History.FirstOrDefault(d => d.Date == today && d.Tag == tag);
 		if (day is null)
 		{
-			day = new DayStats { Date = today };
+			day = new DayStats { Date = today, Tag = tag };
 			History.Add(day);
 		}
 

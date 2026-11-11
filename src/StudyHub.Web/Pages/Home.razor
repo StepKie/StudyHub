@@ -3,7 +3,13 @@
 
 <PageTitle>StudyHub</PageTitle>
 
-<MudText Typo="Typo.h5" Class="mb-4">Decks</MudText>
+<MudText Typo="Typo.h5" Class="mb-1">@L["Nav_Decks"]</MudText>
+<MudStack Spacing="0" Class="mb-4">
+  <MudText Typo="Typo.caption"><em>@L["Legend_Due"]</em>: @L["Legend_DueText"]</MudText>
+  <MudText Typo="Typo.caption"><em>@L["Legend_New"]</em>: @L["Legend_NewText"]</MudText>
+  <MudText Typo="Typo.caption"><em>@L["Legend_Started"]</em>: @L["Legend_StartedText"]</MudText>
+  <MudText Typo="Typo.caption"><em>@L["Legend_Reviews"]</em>: @L["Legend_ReviewsText"]</MudText>
+</MudStack>
 
 @if (_decks is null)
 {
@@ -11,8 +17,8 @@
 }
 else if (_decks.Count == 0)
 {
-  <MudAlert Severity="Severity.Info" Class="mb-4">No decks yet. Import an Anki text export or a CSV to get started.</MudAlert>
-  <MudButton Href="import" Variant="Variant.Filled" Color="Color.Primary">Import cards</MudButton>
+  <MudAlert Severity="Severity.Info" Class="mb-4">@L["Home_NoDecks"]</MudAlert>
+  <MudButton Href="import" Variant="Variant.Filled" Color="Color.Primary">@L["Nav_Import"]</MudButton>
 }
 else
 {
@@ -26,26 +32,30 @@ else
           <MudText Typo="Typo.h6">@deck.Name</MudText>
           <MudText Typo="Typo.body2">@Summary(deck, null)</MudText>
           <MudText Typo="Typo.body2" Color="Color.Secondary">
-            @DeckStatistics.ReviewsOn(deck, _today) reviewed today@(streak > 1 ? $" · {streak}-day streak" : "")
+            @L.Plural("Home_ReviewsToday", DeckStatistics.ReviewsOn(deck, _today))@(streak > 1 ? " · " + L.Plural("Home_Streak", streak) : "")
           </MudText>
+          @if (TodaySections(deck) is { Length: > 0 } sections)
+          {
+            <MudText Typo="Typo.caption">@L["Home_Today", sections]</MudText>
+          }
         </MudCardContent>
         <MudCardActions>
-          <MudButton Href="@StudyHref(deck, null)" Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!StudyQueue.HasWork(deck, _today))">Study</MudButton>
+          <MudButton Href="@StudyHref(deck, null)" Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!StudyQueue.HasWork(deck, _today))">@L["Home_Study"]</MudButton>
           @if (tags.Count > 1)
           {
             <MudButton OnClick="@(() => _expandedId = _expandedId == deck.Id ? null : deck.Id)">
-              Sections (@tags.Count)
+              @L["Home_Sections", tags.Count]
             </MudButton>
           }
           <MudSpacer />
           @if (_confirmDeleteId == deck.Id)
           {
-            <MudButton Color="Color.Error" OnClick="@(() => DeleteAsync(deck))">Delete deck and progress?</MudButton>
-            <MudButton OnClick="@(() => _confirmDeleteId = null)">Cancel</MudButton>
+            <MudButton Color="Color.Error" OnClick="@(() => DeleteAsync(deck))">@L["Home_DeleteConfirm"]</MudButton>
+            <MudButton OnClick="@(() => _confirmDeleteId = null)">@L["Common_Cancel"]</MudButton>
           }
           else
           {
-            <MudIconButton Icon="@Icons.Material.Filled.Delete" title="Delete deck" OnClick="@(() => _confirmDeleteId = deck.Id)" />
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" title="@L["Home_DeleteDeck"]" OnClick="@(() => _confirmDeleteId = deck.Id)" />
           }
         </MudCardActions>
         @if (_expandedId == deck.Id)
@@ -60,7 +70,7 @@ else
                     <MudText Typo="Typo.body1">@tag</MudText>
                     <MudText Typo="Typo.caption">@Summary(deck, tag)</MudText>
                   </div>
-                  <MudButton Href="@StudyHref(deck, tag)" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(!StudyQueue.HasWork(deck, _today, tag))">Study</MudButton>
+                  <MudButton Href="@StudyHref(deck, tag)" Size="Size.Small" Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(!StudyQueue.HasWork(deck, _today, tag))">@L["Home_Study"]</MudButton>
                 </MudStack>
               }
             </MudStack>
@@ -85,8 +95,39 @@ else
     var due = scope.Count(c => !c.State.IsNew && c.State.Due <= _today);
     var unseen = scope.Count(c => c.State.IsNew);
 
-    return $"{scope.Count} cards · {due} due · {unseen} new";
+    var parts = new List<string> { L.Plural("Home_Cards", scope.Count), L["Home_Due", due], L["Home_New", unseen] };
+    var started = scope.Count(c => c.State.FirstReviewed == _today);
+    if (started > 0)
+    {
+      parts.Add(L["Home_StartedToday", started]);
+    }
+
+    var reviewedToday = DeckStatistics.ReviewsOn(deck, _today, tag);
+    if (tag is not null && reviewedToday > 0)
+    {
+      parts.Add(L.Plural("Home_ReviewsToday", reviewedToday));
+    }
+
+    if (due == 0 && DeckStatistics.NextDue(deck, tag) is { } next)
+    {
+      parts.Add(L["Home_NextReview", Relative(next)]);
+    }
+
+    return string.Join(" · ", parts);
   }
+
+  string Relative(DateOnly date) => (date.DayNumber - _today.DayNumber) switch
+  {
+    <= 0 => L["Rel_Today"],
+    1 => L["Rel_Tomorrow"],
+    var days => L["Rel_InDays", days],
+  };
+
+  string TodaySections(Deck deck) => string.Join(", ", deck
+    .GetTags()
+    .Select(tag => (Tag: tag, Reviews: DeckStatistics.ReviewsOn(deck, _today, tag), Started: deck.Cards.Count(c => c.Tag == tag && c.State.FirstReviewed == _today)))
+    .Where(s => s.Reviews > 0 || s.Started > 0)
+    .Select(s => $"{s.Tag} ({string.Join(" · ", new[] { s.Started > 0 ? L["Home_Started", s.Started].Value : null, s.Reviews > 0 ? L.Plural("Home_Reviews", s.Reviews).Value : null }.OfType<string>())})"));
 
   static string StudyHref(Deck deck, string? tag) =>
     tag is null ? $"study/{deck.Id}" : $"study/{deck.Id}?tag={Uri.EscapeDataString(tag)}";

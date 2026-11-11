@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <Content Include="Resources\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\StudyHub.Web\SharedResource*.resx" Link="Localization\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Using Include="Xunit" />
   </ItemGroup>
 

@@ -2,12 +2,10 @@
 @inject IDeckRepository Decks
 @inject NavigationManager Nav
 
-<PageTitle>Import cards</PageTitle>
+<PageTitle>@L["Nav_Import"]</PageTitle>
 
-<MudText Typo="Typo.h5" Class="mb-2">Import cards</MudText>
-<MudText Typo="Typo.body2" Class="mb-4">
-  Anki "Notes in Plain Text" export or a CSV / TSV file: column 1 is the front, column 2 the back, an optional third column the tag.
-</MudText>
+<MudText Typo="Typo.h5" Class="mb-2">@L["Nav_Import"]</MudText>
+<MudText Typo="Typo.body2" Class="mb-4">@L["Import_Help"]</MudText>
 
 <InputFile OnChange="OnFileSelectedAsync" accept=".txt,.csv,.tsv" class="mb-4" />
 
@@ -18,8 +16,8 @@
 
 @if (_result is not null)
 {
-  <MudTextField @bind-Value="_deckName" Label="Deck name" Class="my-3" />
-  <MudText Typo="Typo.subtitle2">@_result.Cards.Count cards found@(_result.SkippedRows > 0 ? $", {_result.SkippedRows} rows skipped" : "")</MudText>
+  <MudTextField @bind-Value="_deckName" Label="@L["Import_DeckName"]" Class="my-3" />
+  <MudText Typo="Typo.subtitle2">@L.Plural("Import_Found", _result.Cards.Count)@(_result.SkippedRows > 0 ? ", " + L.Plural("Import_Skipped", _result.SkippedRows) : "")</MudText>
   <MudList T="string" Dense="true" Class="mb-3">
     @foreach (var card in _result.Cards.Take(5))
     {
@@ -27,7 +25,7 @@
     }
   </MudList>
   <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(_result.Cards.Count == 0 || string.IsNullOrWhiteSpace(_deckName))" OnClick="CreateDeckAsync">
-    Create deck
+    @L["Import_Create"]
   </MudButton>
 }
 

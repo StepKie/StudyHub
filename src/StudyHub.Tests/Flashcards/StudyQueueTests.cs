@@ -25,7 +25,7 @@ public class StudyQueueTests
 	}
 
 	[Fact]
-	public void New_card_limit_accounts_for_cards_already_introduced_today()
+	public void Cards_started_earlier_today_do_not_reduce_the_next_session()
 	{
 		var introduced = Card.Create("seen", "s");
 		introduced.State.Due = _today.AddDays(1);
@@ -33,30 +33,29 @@ public class StudyQueueTests
 		var fresh = Enumerable.Range(0, 5).Select(i => Card.Create($"f{i}", "x"));
 		var deck = Deck.Create("d", fresh.Prepend(introduced));
 
-		var queue = StudyQueue.Build(deck, _today, newCardsPerDay: 3);
+		var queue = StudyQueue.Build(deck, _today, newCards: 3);
 
-		queue.Should().HaveCount(2);
+		queue.Should().HaveCount(3);
 	}
 
 	[Fact]
-	public void Tag_restricts_cards_and_the_daily_new_count_to_that_section()
+	public void Tag_restricts_the_session_to_that_section()
 	{
 		var anatomyDone = Card.Create("a1", "x", "Anatomy");
 		anatomyDone.State.Due = _today.AddDays(1);
-		anatomyDone.State.FirstReviewed = _today;
 		var anatomyNew = Card.Create("a2", "x", "Anatomy");
 		var numbersNew = Enumerable.Range(0, 3).Select(i => Card.Create($"n{i}", "x", "Numbers"));
 		var deck = Deck.Create("d", numbersNew.Prepend(anatomyNew).Prepend(anatomyDone));
 
-		var anatomy = StudyQueue.Build(deck, _today, newCardsPerDay: 1, tag: "Anatomy");
-		var numbers = StudyQueue.Build(deck, _today, newCardsPerDay: 2, tag: "Numbers");
+		var anatomy = StudyQueue.Build(deck, _today, tag: "Anatomy");
+		var numbers = StudyQueue.Build(deck, _today, newCards: 2, tag: "Numbers");
 
-		anatomy.Should().BeEmpty();
+		anatomy.Should().Equal(anatomyNew);
 		numbers.Should().HaveCount(2);
 	}
 
 	[Fact]
-	public void HasWork_ignores_the_daily_limit_but_not_the_section()
+	public void HasWork_is_scoped_to_the_section()
 	{
 		var seen = Card.Create("s", "x", "Anatomy");
 		seen.State.Due = _today.AddDays(5);

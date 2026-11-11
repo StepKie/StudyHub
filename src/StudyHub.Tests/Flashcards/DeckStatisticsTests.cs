@@ -47,6 +47,36 @@ public class DeckStatisticsTests
 	}
 
 	[Fact]
+	public void Reviews_are_tracked_per_section_and_summed_per_day()
+	{
+		var deck = Deck.Create("d");
+
+		deck.RecordReview(_today, Rating.Good, "A");
+		deck.RecordReview(_today, Rating.Again, "A");
+		deck.RecordReview(_today, Rating.Good, "B");
+		deck.RecordReview(_today, Rating.Good);
+
+		DeckStatistics.ReviewsOn(deck, _today).Should().Be(4);
+		DeckStatistics.ReviewsOn(deck, _today, "A").Should().Be(2);
+		DeckStatistics.AgainOn(deck, _today).Should().Be(1);
+		DeckStatistics.BySection(deck, _today).Should().Equal((null, 1), ("A", 2), ("B", 1));
+	}
+
+	[Fact]
+	public void NextDue_is_the_earliest_studied_card_in_scope_and_null_when_nothing_is_studied()
+	{
+		var soon = Card.Create("a", "x", "A");
+		soon.State.Due = _today.AddDays(1);
+		var later = Card.Create("b", "x", "B");
+		later.State.Due = _today.AddDays(6);
+		var deck = Deck.Create("d", [later, soon, Card.Create("c", "x", "C")]);
+
+		DeckStatistics.NextDue(deck).Should().Be(_today.AddDays(1));
+		DeckStatistics.NextDue(deck, "B").Should().Be(_today.AddDays(6));
+		DeckStatistics.NextDue(deck, "C").Should().BeNull();
+	}
+
+	[Fact]
 	public void Backup_without_history_still_loads()
 	{
 		const string oldBackup = """{ "Version": 1, "Decks": [ { "Id": "x", "Name": "Old", "Cards": [] } ] }""";
